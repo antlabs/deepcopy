@@ -48,9 +48,9 @@ func Test_Map_Special(t *testing.T) {
 		// map里面的值是结构体
 		func() testCase {
 			src := map[string]mVal{
-				"1": mVal{ID: 1, Name: "name:1"},
-				"2": mVal{ID: 2, Name: "name:2"},
-				"3": mVal{ID: 3, Name: "name:3"},
+				"1": {ID: 1, Name: "name:1"},
+				"2": {ID: 2, Name: "name:2"},
+				"3": {ID: 3, Name: "name:3"},
 			}
 
 			var dst map[string]mVal
@@ -60,7 +60,7 @@ func Test_Map_Special(t *testing.T) {
 		// dst的地址不是指针，没有发生panic
 		func() testCase {
 			src := map[string]mVal{
-				"1": mVal{ID: 1, Name: "name:1"},
+				"1": {ID: 1, Name: "name:1"},
 			}
 
 			var dst map[string]mVal
@@ -69,7 +69,7 @@ func Test_Map_Special(t *testing.T) {
 		}(),
 		func() testCase {
 			src := map[string]mVal{
-				"1": mVal{ID: 1, Name: "name:1"},
+				"1": {ID: 1, Name: "name:1"},
 			}
 
 			Copy(new(int), &src).Do()
