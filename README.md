@@ -165,7 +165,7 @@ func main() {
         deepcopy.CopyEx(&a, &b)
 }
 ```
-## 根据某个规则修改src的值，回调参数的入参是src的值
+## 根据某个规则修改dst的值，回调参数的入参是dst的值
 ```go
 var src = testSrcModifyMap{}
 
