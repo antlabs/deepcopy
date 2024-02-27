@@ -17,12 +17,12 @@ func Copy(dst, src interface{}) *deepCopy {
 	}
 
 	d := deepCopy{
-		maxDepth: noDepthLimited,
-		dst:      dst,
-		src:      src,
+		dst: dst,
+		src: src,
 		// visited:  make(map[visit]struct{}, 8),
 	}
 
+	d.maxDepth = noDepthLimited
 	return &d
 }
 
