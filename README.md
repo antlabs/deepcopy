@@ -165,133 +165,33 @@ func main() {
         deepcopy.CopyEx(&a, &b)
 }
 ```
-## 根据某个规则修改dst的值，回调参数的入参是dst的值
-```go
-var src = testSrcModifyMap{}
 
-		var need = testDstModifyMap{
-			I:   1,
-			I8:  1,
-			I16: 1,
-			I32: 1,
-			I64: 1,
-
-			U:   1,
-			U8:  1,
-			U16: 1,
-			U32: 1,
-			U64: 1,
-
-			F32: 1,
-			F64: 1,
-
-			S: "hello",
-			B: true,
-		}
-
-		var dst testDstModifyMap
-
-		err := CopyEx(&dst, &src, WithModifyDstField(map[string]ModifyDstFieldFunc{
-			"I": func(v interface{}) interface{} {
-				return 1
-			},
-			"I8": func(v interface{}) interface{} {
-				return int8(1)
-			},
-			"I16": func(v interface{}) interface{} {
-				return int16(1)
-			},
-			"I32": func(v interface{}) interface{} {
-				return int32(1)
-			},
-			"I64": func(v interface{}) interface{} {
-				return int64(1)
-			},
-
-			"U": func(v interface{}) interface{} {
-				return uint(1)
-			},
-			"U8": func(v interface{}) interface{} {
-				return uint8(1)
-			},
-			"U16": func(v interface{}) interface{} {
-				return uint16(1)
-			},
-			"U32": func(v interface{}) interface{} {
-				return uint32(1)
-			},
-			"U64": func(v interface{}) interface{} {
-				return uint64(1)
-			},
-			"F32": func(v interface{}) interface{} {
-				return float32(1)
-			},
-			"F64": func(v interface{}) interface{} {
-				return float64(1)
-			},
-			"S": func(srcArg interface{}) (newDst interface{}) {
-				return "hello"
-			},
-			"B": func(srcArg interface{}) (newDst interface{}) {
-				return true
-			},
-		}))
-
-		if err != nil {
-			t.Errorf("test faild, err:%v", err)
-		}
-		if !reflect.DeepEqual(dst, need) {
-			t.Errorf("test faild, got:%v", dst)
-		}
-```
 ## 根据某个规则修改dst的值，回调参数的入参是src的值
+适合的场景是，比如把src里面的uid字段，拷贝到dst里面的uidString字段
 ```go
-err := CopyEx(&dst, &src, WithModifySrcField(map[string]ModifySrcFieldFunc{
-		"I": func(v interface{}) interface{} {
-			return 1
-		},
-		"I8": func(v interface{}) interface{} {
-			return int8(1)
-		},
-		"I16": func(v interface{}) interface{} {
-			return int16(1)
-		},
-		"I32": func(v interface{}) interface{} {
-			return int32(1)
-		},
-		"I64": func(v interface{}) interface{} {
-			return int64(1)
-		},
+var src = testSrcModifyMap{
+			I: 2,
+}
 
-		"U": func(v interface{}) interface{} {
-			return uint(1)
-		},
-		"U8": func(v interface{}) interface{} {
-			return uint8(1)
-		},
-		"U16": func(v interface{}) interface{} {
-			return uint16(1)
-		},
-		"U32": func(v interface{}) interface{} {
-			return uint32(1)
-		},
-		"U64": func(v interface{}) interface{} {
-			return uint64(1)
-		},
-		"S": func(srcArg interface{}) (newDst interface{}) {
-			return "hello"
-		},
-		"B": func(srcArg interface{}) (newDst interface{}) {
-			return true
-		},
-	}))
+var need = testDstModifyMap{
+	I8: 3,
+}
 
-	if err != nil {
-		t.Logf("test faild, err:%v", err)
-	}
-	if !reflect.DeepEqual(dst, need) {
-		t.Logf("test faild, got:%v", dst)
-	}
+var dst testDstModifyMap
+err := CopyEx(&dst, &src, WithModifySrcField(map[string]ModifySrcValue{
+	"I": {
+		DstFieldName: "I8", SrcFieldName: "I", Callback: func(v interface{}) interface{} {
+			return int8(v.(int) + 1)
+		},
+	},
+}))
+
+if err != nil {
+	t.Errorf("test faild, err:%v", err)
+}
+if !reflect.DeepEqual(dst, need) {
+	t.Errorf("test faild, got:%v", dst)
+}
 ```
 # benchmark
 从零实现的deepcopy相比json序列化与反序列化方式拥有更好的性能

@@ -228,8 +228,14 @@ func (d *deepCopy) cpyStruct(dst, src reflect.Value, fieldName string, depth int
 			continue
 		}
 
+		name := sf.Name
+		if d.modifySrcMap != nil {
+			if v, ok := d.modifySrcMap[sf.Name]; ok {
+				name = v.DstFieldName
+			}
+		}
 		// 使用src的字段名在dst里面取出reflect.Value值
-		dstValue := dst.FieldByName(sf.Name)
+		dstValue := dst.FieldByName(name)
 
 		// dst没有src里面所有的字段，跳过
 		if !dstValue.IsValid() {
@@ -314,18 +320,22 @@ func isBaseType(kind reflect.Kind) bool {
 
 // 其他类型
 func (d *deepCopy) cpyDefault(dst, src reflect.Value, fieldName string, depth int) error {
+	if d.modifySrcMap != nil {
+		if v, ok := d.modifySrcMap[fieldName]; ok {
+
+			newInterfaceValue := v.Callback(src.Interface())
+			newValue := reflect.ValueOf(newInterfaceValue)
+			if newValue.Kind() == dst.Kind() {
+				dst.Set(newValue)
+			}
+
+			return nil
+		}
+	}
 	if dst.Kind() != src.Kind() {
 		return nil
 	}
 
-	if d.modifySrcMap != nil {
-
-		if f, ok := d.modifySrcMap[fieldName]; ok {
-			newValue := f(src.Interface())
-			dst.Set(reflect.ValueOf(newValue))
-			return nil
-		}
-	}
 	switch src.Kind() {
 	case
 		reflect.Int,
